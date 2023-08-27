@@ -139,7 +139,11 @@ export class AppController {
 
   @Get('batteries')
   async getAllBatteries(): Promise<BatteryModel[]> {
-    return this.BatteryService.getBatteries({});
+    return this.BatteryService.getBatteries({
+      where: {
+        brandId: 1,
+      },
+    });
   }
 
   @Get('inverters')
@@ -158,6 +162,9 @@ export class AppController {
             batteryType: searchString,
           },
         ],
+        AND: {
+            brandId: 1,
+        }
       },
     });
   }
