@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// tabelas para baterias:
+
+model Battery {
+  id       Int    @id @default(autoincrement())
+  brandId  Int
+  model    String @unique
+  lifespan Int
+  dod      Float
+  voltage  Float
+  current  Float
+
+  // nominalEnergy   Float - computed field
+  // correctedEnergy Float - computed field
+
+  batteryType BatteryType
+  brand       Brand       @relation(fields: [brandId], references: [id])
+}
+
+model Brand {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  batteries Battery[]
+}
+
+enum BatteryType {
+  LEAD_ACID
+  LITHIUM
+}
+
+// tabelas para inversores hibridos:
+
+model GridVoltageReference {
+  id          Int        @id @default(autoincrement())
+  voltage     String     @unique
+  description String     
+  region      String
+  inverters   Inverter[]
+}
+
+model Inverter {
+  id             Int    @id @default(autoincrement())
+  model          String @unique
+  batteryVoltage String
+  nominalPower   Float
+
+  gridVoltageReferenceId Int
+  gridVoltageReference   GridVoltageReference @relation(fields: [gridVoltageReferenceId], references: [id])
+}
