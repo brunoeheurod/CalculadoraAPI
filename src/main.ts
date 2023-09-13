@@ -7,7 +7,7 @@ async function bootstrap() {
     origin: [
       'https://calculadora-eosin-chi.vercel.app',
       'https://main--imaginative-praline-c53240.netlify.app',
-      'https://template-sozonome.vercel.app',
+      'https://calculadora-deye.vercel.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
