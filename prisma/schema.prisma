@@ -55,6 +55,8 @@ model Inverter {
   batteryVoltage String
   nominalPower   Float
 
+  price          Float @default(00.0)
+
   gridVoltageReferenceId Int
   gridVoltageReference   GridVoltageReference @relation(fields: [gridVoltageReferenceId], references: [id])
 }
