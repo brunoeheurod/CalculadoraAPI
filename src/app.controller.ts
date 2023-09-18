@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Controller,
   Get,
   Param,
   Post,
   Body,
-  Put,
-  Delete,
 } from '@nestjs/common';
 import { BatteryService, prisma } from './battery/battery.service';
 import { InverterService } from './inverter/inverter.service';
@@ -92,7 +91,7 @@ export class AppController {
     }
 
     quotationList.sort(
-      (a, b) => a.nominalPower * a.quantity - b.nominalPower * b.quantity,
+      (a, b) => a.price * a.quantity - b.price * b.quantity,
     );
 
     return quotationList;
