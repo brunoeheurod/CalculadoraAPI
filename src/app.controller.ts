@@ -1,11 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  Controller,
-  Get,
-  Param,
-  Post,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { BatteryService, prisma } from './battery/battery.service';
 import { InverterService } from './inverter/inverter.service';
 import {
@@ -87,14 +81,19 @@ export class AppController {
         model: inverter.model,
         nominalPower: inverter.nominalPower,
         quantity: Math.ceil(fcTPower / inverter.nominalPower),
+        price: inverter.price,
       });
     }
 
-    quotationList.sort(
-      (a, b) => a.price * a.quantity - b.price * b.quantity,
-    );
+    quotationList.sort((a, b) => {
+      return a.price * a.quantity - b.price * b.quantity;
+    });
 
-    return quotationList;
+    return quotationList.map(({ model, nominalPower, quantity }) => ({
+      model,
+      nominalPower,
+      quantity,
+    }));
   }
 
   @Post('compare-batteries')
@@ -162,8 +161,8 @@ export class AppController {
           },
         ],
         AND: {
-            brandId: 1,
-        }
+          brandId: 1,
+        },
       },
     });
   }
