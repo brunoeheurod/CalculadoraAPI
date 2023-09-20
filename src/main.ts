@@ -5,7 +5,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: [
-      'https://calculadora.deyeinversores.com.br',
+      'https://deye-calculadora.deyeinversores.com.br',
+      'https://calculadora.app.deyeinversores.com.br',
       'https://calculadora-eosin-chi.vercel.app',
       'https://main--imaginative-praline-c53240.netlify.app',
       'https://calculadora-deye.vercel.app',
