@@ -2,9 +2,11 @@
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { BatteryService, prisma } from './battery/battery.service';
 import { InverterService } from './inverter/inverter.service';
+import { AllInOneService } from './allInOne/allInOne.service';
 import {
   Battery as BatteryModel,
   Inverter as InverterModel,
+  AllInOne as AllInOneModel,
   GridVoltageReference as GridModel,
   Brand as BrandModel,
   BatteryType,
@@ -16,6 +18,7 @@ export class AppController {
   constructor(
     private readonly BatteryService: BatteryService,
     private readonly InverterService: InverterService,
+    private readonly AllInOneService: AllInOneService,
   ) {}
 
   @Get('')
@@ -147,6 +150,11 @@ export class AppController {
   @Get('inverters')
   async getAllInverters(): Promise<InverterModel[]> {
     return this.InverterService.getInverters({});
+  }
+
+  @Get('AllInOnes')
+  async getAllAllInOnes(): Promise<Omit<AllInOneModel,'batteryId'>[]> {
+    return this.AllInOneService.getAllInOnes({});
   }
 
   @Get('filtered-batteries/:searchString')

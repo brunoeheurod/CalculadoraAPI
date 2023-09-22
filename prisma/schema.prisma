@@ -26,6 +26,7 @@ model Battery {
 
   batteryType BatteryType
   brand       Brand       @relation(fields: [brandId], references: [id])
+  allInOnes   AllInOne[]
 }
 
 model Brand {
@@ -47,6 +48,7 @@ model GridVoltageReference {
   description String     
   region      String
   inverters   Inverter[]
+  allInOnes   AllInOne[]
 }
 
 model Inverter {
@@ -59,4 +61,17 @@ model Inverter {
 
   gridVoltageReferenceId Int
   gridVoltageReference   GridVoltageReference @relation(fields: [gridVoltageReferenceId], references: [id])
+}
+
+model AllInOne {
+  id             Int    @id @default(autoincrement())
+  model          String @unique
+  nominalPower   Float
+
+  price          Float @default(00.0)
+
+  batteryId      Int
+  gridVoltageReferenceId Int
+  gridVoltageReference   GridVoltageReference @relation(fields: [gridVoltageReferenceId], references: [id])
+  battery                Battery @relation(fields: [batteryId], references: [id])
 }

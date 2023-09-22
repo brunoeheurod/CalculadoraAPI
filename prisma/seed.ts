@@ -1,7 +1,9 @@
-import { batteries } from './batteries';
-import { brands } from './brands';
-import { grids } from './grids';
-import { inverters } from './inverters'
+// import { batteries } from './batteries';
+// import { brands } from './brands';
+// import { grids } from './grids';
+// import { inverters } from './inverters'
+// import { allInOnes } from './allInOnes'
+// import { updatedInverters } from './updatedInverters';
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient();
@@ -22,12 +24,17 @@ async function main(){
     //         data: battery
     //     })
     // }
-    // for (const inverter of inverters) {
-    //     await prisma.inverter.create({
-    //         data: inverter
+    // for (const allInOne of allInOnes) {
+    //     await prisma.allInOne.create({
+    //         data: allInOne
     //     })
     // }
-}
+
+    // for (const updatedInverter of updatedInverters) {
+    // await prisma.inverter.update({
+    //     ...updatedInverter
+    // })}
+} // npx prisma db seed -- --environment development
 
 main().catch(e => {
     console.log(e);
