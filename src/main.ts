@@ -5,7 +5,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: [
-      'https://template-sozonome-git-test-languages-brunodeye.vercel.app/',
+      'https://template-sozonome-git-test-languages-brunodeye.vercel.app',
       'https://deye-calculadora.deyeinversores.com.br',
       'https://calculadora.app.deyeinversores.com.br',
       'https://calculadora-eosin-chi.vercel.app',
