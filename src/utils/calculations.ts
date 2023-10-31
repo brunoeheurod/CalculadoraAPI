@@ -57,3 +57,42 @@ export function BatteryComparison(
       );
   }
 }
+
+export function coefLV(
+  batteryQty: number,
+  inverterQty: number,
+  batteryCurrent: number,
+  CDCurrent: number,
+) {
+  return (batteryQty * batteryCurrent) / (inverterQty * CDCurrent);
+}
+
+export function coefHV(
+  batteryQty: number,
+  inverterQty: number,
+  correctedEnergy: number,
+  inverterNominalPower: number,
+) {
+  return (correctedEnergy * batteryQty) / (inverterQty * inverterNominalPower);
+}
+
+export function adjustedInverterQty(
+  inverterQty: number,
+  coef: number
+) {
+  if ( coef > 10 ) {
+    return Math.ceil((inverterQty * coef) / 10);
+  }
+
+  return inverterQty;
+}
+
+export function adjustedBatteryQty(
+  batteryQty: number,
+  coef: number,
+) {
+  if (coef < 1) {
+    return Math.ceil(batteryQty / coef); 
+  }
+  return batteryQty;
+}

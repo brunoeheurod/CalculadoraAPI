@@ -11,7 +11,13 @@ import {
   Brand as BrandModel,
   BatteryType,
 } from '@prisma/client';
-import BatteryQnty, { BatteryComparison } from './utils/calculations';
+import BatteryQnty, {
+  BatteryComparison,
+  adjustedBatteryQty,
+  adjustedInverterQty,
+  coefHV,
+  coefLV,
+} from './utils/calculations';
 
 @Controller()
 export class AppController {
@@ -26,6 +32,17 @@ export class AppController {
     return 'Welcome to the Inverter Calculator API';
   }
 
+  @Post('calculate-coef')
+  async getCoef(
+    @Body()
+    requestBody: {
+      batteryQty: number;
+      inverterQty: number;
+    },
+  ): Promise<any> {
+    return;
+  }
+
   @Post('calculate-batteries')
   async getBatteriesQuantity(
     @Body()
@@ -33,9 +50,10 @@ export class AppController {
       model: string;
       tEnergy: number;
       fc: number;
+      coef?: number;
     },
   ): Promise<any> {
-    const { model, tEnergy, fc } = requestBody;
+    const { model, tEnergy, fc, coef } = requestBody;
 
     const {
       voltage,
@@ -53,13 +71,14 @@ export class AppController {
         id: brandId,
       },
     });
+    const qnty = BatteryQnty(voltage, current, tEnergy, dod, fc, batteryType);
     const quotationBattery = {
       modelFullName: `${brandName} - ${model}`,
       nominalVoltage: `${voltage}V`,
       nominalEnergy: nominalEnergy / 1000,
       dod: dod,
       lifespan: lifespan,
-      quantity: BatteryQnty(voltage, current, tEnergy, dod, fc, batteryType),
+      quantity: coef ? adjustedBatteryQty(qnty, coef) : qnty,
     };
     return quotationBattery;
   }
@@ -70,21 +89,69 @@ export class AppController {
     requestBody: {
       gridVoltage: string;
       tPower: number;
+      batteryModel?: string;
+      batteryQty?: number;
     },
   ): Promise<any[]> {
-    const { gridVoltage, tPower } = requestBody;
+    const { gridVoltage, tPower, batteryQty, batteryModel } = requestBody;
     const fcTPower = tPower * 1.1;
     const inverters = await this.InverterService.getInverters({
       where: { gridVoltageReference: { voltage: gridVoltage } },
     });
     const quotationList = [];
 
-    for (const inverter of inverters) {
+    let filteredInverters = inverters;
+    if (batteryModel && batteryQty) {
+      var { current, correctedEnergy } = await this.BatteryService.getBattery({
+        model: batteryModel,
+      });
+
+      filteredInverters = inverters.filter((inverter) =>
+        batteryModel.startsWith('BOS')
+          ? inverter.batteryVoltage.startsWith('100')
+          : inverter.batteryVoltage.startsWith('48'),
+      );
+    }
+
+    for (const inverter of filteredInverters) {
+      const inverterQty = Math.ceil(fcTPower / inverter.nominalPower);
+      if (batteryModel && batteryQty) {
+        var coefHVValue = coefHV(
+          batteryQty,
+          inverterQty,
+          correctedEnergy,
+          inverter.nominalPower,
+        );
+        var coefLVValue = coefLV(
+          batteryQty,
+          inverterQty,
+          current,
+          inverter.CDCurrent,
+        );
+      }
       quotationList.push({
         model: inverter.model,
         nominalPower: inverter.nominalPower,
-        quantity: Math.ceil(fcTPower / inverter.nominalPower),
+        quantity:
+          batteryModel && batteryQty
+            ? adjustedInverterQty(
+                inverterQty,
+                inverter.batteryVoltage.startsWith('100')
+                  ? coefHVValue
+                  : coefLVValue,
+              )
+            : inverterQty,
         price: inverter.price,
+        coef:
+          batteryModel && batteryQty
+            ? inverter.batteryVoltage.startsWith('100')
+              ? coefHVValue > 10
+                ? 10
+                : coefHVValue
+              : coefLVValue > 10
+              ? 10
+              : coefLVValue
+            : 1,
       });
     }
 
@@ -92,10 +159,11 @@ export class AppController {
       return a.price * a.quantity - b.price * b.quantity;
     });
 
-    return quotationList.map(({ model, nominalPower, quantity }) => ({
+    return quotationList.map(({ model, nominalPower, quantity, coef }) => ({
       model,
       nominalPower,
       quantity,
+      coef,
     }));
   }
 
@@ -153,7 +221,7 @@ export class AppController {
   }
 
   @Get('AllInOnes')
-  async getAllAllInOnes(): Promise<Omit<AllInOneModel,'batteryId'>[]> {
+  async getAllAllInOnes(): Promise<Omit<AllInOneModel, 'batteryId'>[]> {
     return this.AllInOneService.getAllInOnes({});
   }
 
