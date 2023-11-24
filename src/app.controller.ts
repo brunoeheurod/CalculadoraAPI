@@ -106,10 +106,12 @@ export class AppController {
         model: batteryModel,
       });
 
-      filteredInverters = inverters.filter((inverter) =>
-        batteryModel.startsWith('BOS')
+      filteredInverters = inverters.filter((inverter) =>{
+      
+         return batteryModel.startsWith('BOS')
           ? inverter.batteryVoltage.startsWith('100')
-          : inverter.batteryVoltage.startsWith('48'),
+          : inverter.batteryVoltage.startsWith('48')
+        }
       );
     }
 
@@ -152,6 +154,30 @@ export class AppController {
               ? 10
               : coefLVValue
             : 1,
+        adjustedCoef:
+          batteryModel && batteryQty
+            ? inverter.batteryVoltage.startsWith('100')
+              ? coefHVValue > 10
+                ? 10
+                : coefHVValue < 1
+                ? coefHV(
+                    Math.ceil(batteryQty / coefHVValue),
+                    inverterQty,
+                    correctedEnergy,
+                    inverter.nominalPower,
+                  )
+                : coefHVValue
+              : coefLVValue > 10
+              ? 10
+              : coefLVValue < 1
+              ? coefLV(
+                  Math.ceil(batteryQty / coefHVValue),
+                  inverterQty,
+                  current,
+                  inverter.CDCurrent,
+                )
+              : coefLVValue
+            : 1,
       });
     }
 
@@ -159,11 +185,12 @@ export class AppController {
       return a.price * a.quantity - b.price * b.quantity;
     });
 
-    return quotationList.map(({ model, nominalPower, quantity, coef }) => ({
+    return quotationList.map(({ model, nominalPower, quantity, coef, adjustedCoef }) => ({
       model,
       nominalPower,
       quantity,
       coef,
+      adjustedCoef
     }));
   }
 

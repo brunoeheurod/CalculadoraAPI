@@ -80,7 +80,7 @@ export function adjustedInverterQty(
   inverterQty: number,
   coef: number
 ) {
-  if ( coef > 10 ) {
+  if ( +coef > 10 ) {
     return Math.ceil((inverterQty * coef) / 10);
   }
 
@@ -91,7 +91,7 @@ export function adjustedBatteryQty(
   batteryQty: number,
   coef: number,
 ) {
-  if (coef < 1) {
+  if (+coef < 1) {
     return Math.ceil(batteryQty / coef); 
   }
   return batteryQty;
